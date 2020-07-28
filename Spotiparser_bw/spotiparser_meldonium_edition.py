@@ -353,5 +353,31 @@ def random_word(num_runs):
     return result
 
 
-words = random_word(10)
-runmemore(q_words=words, track_requests_limit=100)
+# words = random_word(100)
+# runmemore(q_words=words, track_requests_limit=100)
+# for i in range(0, 100):
+#     words = random_word(1)
+#     runmemore(q_words=words, track_requests_limit=100)  
+
+def run_num_tracks(spotify=SpotifyAPI(client_id, client_secret), num_tracks=20, q_words=["denial", "aggression"], track_requests_limit=200):
+    processors = []
+
+    
+    # loop through random words to get tracks for each
+    for word in q_words:
+        processors = spoti_search(
+            word, spotify, [], [], global_limit=track_requests_limit, limit=num_tracks)
+
+    # merge all dataframes into one and save as CSV
+    user_tracks_dfs = []
+    
+
+    if len(processors) > 0:
+        for processor in processors:
+            user_tracks_dfs.append(processor.merged_df)
+        
+
+    return user_tracks_dfs
+    
+my_list=run_num_tracks(spotify=SpotifyAPI(client_id, client_secret), num_tracks=10, q_words=["toxic"], track_requests_limit=10)
+print(my_list[0])
