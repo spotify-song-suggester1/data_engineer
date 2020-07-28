@@ -1,0 +1,71 @@
+ env /opt/anaconda3/envs/lambda/bin/python /Users/ekaterinaromanovskaya/.vscode/extensions/ms-python.python-2020.7.96456/pythonFiles/lib/python/debugpy/launcher 63250 -- /Users/ekaterinaromanovskaya/Documents/LS/Spotiparser_bw/spotiparser.py 
+source /opt/anaconda3/bin/activate
+➜  Spotiparser_bw  env /opt/anaconda3/envs/lambda/bin/python /Users/ekaterinaromanovskaya/.vscode/extensions/ms-python.python-2020.7.96456/pythonFiles/lib/python/debugpy/launcher 63250 -- /Users/ekaterinaromanovskaya/Documents/LS/Spotiparser_bw/spotiparser.py 
+source /opt/anaconda3/bin/activate
+conda activate lambda
+➜  Spotiparser_bw source /opt/anaconda3/bin/activate
+(base) ➜  Spotiparser_bw conda activate lambda
+(lambda) ➜  Spotiparser_bw pipenv install
+Warning: Python 3.6 was not found on your system…
+Neither 'pyenv' nor 'asdf' could be found to install Python.
+You can specify specific versions of Python with:
+$ pipenv --python path/to/python
+(lambda) ➜  Spotiparser_bw pipenv install
+Creating a virtualenv for this project…
+Pipfile: /Users/ekaterinaromanovskaya/Documents/LS/Spotiparser_bw/Pipfile
+Using /opt/anaconda3/envs/lambda/bin/python3.7m (3.7.7) to create virtualenv…
+⠧ Creating virtual environment...created virtual environment CPython3.7.7.final.0-64 in 361ms
+  creator CPython3Posix(dest=/Users/ekaterinaromanovskaya/.local/share/virtualenvs/Spotiparser_bw-5H7h6NhE, clear=False, global=False)
+  seeder FromAppData(download=False, pip=bundle, setuptools=bundle, wheel=bundle, via=copy, app_data_dir=/Users/ekaterinaromanovskaya/Library/Application Support/virtualenv)
+    added seed packages: pip==20.1.1, setuptools==47.3.1, wheel==0.34.2
+  activators BashActivator,CShellActivator,FishActivator,PowerShellActivator,PythonActivator,XonshActivator
+
+✔ Successfully created virtual environment! 
+Virtualenv location: /Users/ekaterinaromanovskaya/.local/share/virtualenvs/Spotiparser_bw-5H7h6NhE
+Pipfile.lock (13f131) out of date, updating to (aefcf1)…
+Locking [dev-packages] dependencies…
+Locking [packages] dependencies…
+Building requirements...
+Resolving dependencies...
+✔ Success! 
+Updated Pipfile.lock (aefcf1)!
+Installing dependencies from Pipfile.lock (aefcf1)…
+  🐍   ▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ 12/12 — 00:00:07
+To activate this project's virtualenv, run pipenv shell.
+Alternatively, run a command inside the virtualenv with pipenv run.
+(lambda) ➜  Spotiparser_bw pipenv shell
+Launching subshell in virtual environment…
+ . /Users/ekaterinaromanovskaya/.local/share/virtualenvs/Spotiparser_bw-5H7h6NhE/bin/activate
+➜  Spotiparser_bw  . /Users/ekaterinaromanovskaya/.local/share/virtualenvs/Spotiparser_bw-5H7h6NhE/bin/activate
+➜  Spotiparser_bw python spotiparser.py 
+['hellcat', 'kidult']
+q=hellcat&type=track
+q=kidult&type=track
+➜  Spotiparser_bw python
+Python 3.7.7 (default, May  6 2020, 04:59:01) 
+[Clang 4.0.1 (tags/RELEASE_401/final)] :: Anaconda, Inc. on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import spotiparser as sprs
+['Amaranthus', 'know-nothing']
+q=Amaranthus&type=track
+q=know-nothing&type=track
+>>> from spotiparser import TrackFeatureProcessor as tfp
+>>> from spotiparser import SpotifyAPI as spapi
+>>> spotify = spapi(sprs.client_id, sprs.client_secret)
+>>> word='example'
+>>> s_res = spotify.search(query=word, search_type="track")
+q=example&type=track
+>>> len(tr_resps['tracks'])
+20
+>>> processor = tfp(tr_resps["tracks"][0], af_resps["audio_features"][0], word)
+>>> processor.process_feats_track()
+>>> processor.extract_artists_df()
+>>> processor.merge_track_features()
+>>> processor.create_word_df()
+>>> processor.merged_df.to_csv(f"merged-{word}.csv")
+>>> processor.artists_df.to_csv(f"artists-{word}.csv")
+>>> processor.merged_df.head()
+   duration_ms_x  explicit                      id  is_local  ... valence   tempo duration_ms_y time_signature
+0         149052     False  5SspaMrPfWyRCS0GpjIxa6     False  ...    0.45  90.552        149053              4
+[1 rows x 21 columns]
+>>> exit()
