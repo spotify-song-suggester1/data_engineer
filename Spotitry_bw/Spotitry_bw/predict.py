@@ -3,6 +3,8 @@ from .spotify import get_features, we_recommend, add_song, track_id_for_artist_t
 from .keys import client_id, client_secret
 from sqlalchemy import create_engine
 import pandas as pd
+from pandas import DataFrame
+import sqlite3
 from sklearn.neighbors import NearestNeighbors
 
 
@@ -36,10 +38,19 @@ def predict_best_songs(song_name, artist_name):
         return list(df.loc[new_obs, 'id'])
     
     #Converting the DB to a DF to run a K Means model through
-    engine = create_engine('sqlite:///db.sqlite3')
-    sql = 'SELECT * FROM song'
+    conn = sqlite3.connect('spotitry_songs.db')
+    curs = conn.cursor()
 
-    df = pd.read_sql(sql=sql, con=engine)
+    SQL_Query = pd.read_sql_query(
+    '''
+    SELECT *
+    from spotitry_songs
+    ''',
+    conn)
+
+    df = pd.DataFrame(SQL_Query, columns=['id','name','energy',
+                                      'liveness','danceability','instrumentalness','loudness',
+                                      'speechiness','valence','tempo',])
     
     track_list = predicto(track_id)
     
