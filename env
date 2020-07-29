@@ -1,0 +1,7 @@
+ENV='development'
+DATABASE_URL='sqlite:///spotitry_songs.db'
+
+DB_NAME='oaoihtjd'
+DB_USER='oaoihtjd'
+DB_PASSWORD='4s80lx5n22pvIbLVjX1Jr7r5X74km95r'
+DB_HOST='ruby.db.elephantsql.com'

@@ -23,5 +23,5 @@ CREATE TABLE spotitry_songs(
 conn.commit()
 
 
-read_clients = pd.read_csv (r'C:\Users\hdmec\repos\Spotitry_bw\Spotitry_bw\spotitry_songs.csv')
+read_clients = pd.read_csv (r'/Users/josh/Documents/Lambda/Unit 4/data_engineer/Spotitry_bw/Spotitry_bw/spotitry_songs.csv')
 read_clients.to_sql('spotitry_songs', conn, if_exists='append', index = False) 
