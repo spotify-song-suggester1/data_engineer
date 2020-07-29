@@ -19,7 +19,8 @@ from os import getenv, path
 import csv
 import random
 import time
-
+import urllib
+import numpy as np
 # Readquitme: https://pypi.org/project/Random-Word/
 
 client_id = getenv('CLIENT_ID')
@@ -30,6 +31,8 @@ ALL_WORDS = "all_words.csv"
 
 TRACK_IDS = []
 
+
+ALL_IDS = []
 
 class SpotifyAPI(object):
     access_token = None
@@ -156,6 +159,26 @@ class SpotifyAPI(object):
         print(query_params)
         return self.base_search(query_params)
 
+    def search_artist_track(self, q_track=None, q_artist=None, operator=None, operator_query=None, search_type='track', limit=20, offset=0):
+        query = ""
+        if q_track != None:
+            query = query+f"track:{q_track}"
+        if q_artist != None:
+            query = f" artist:{q_artist}"
+        if query == "":
+            raise Exception("A query is required.")
+        if operator != None and operator_query != None:
+            if operator.lower() == "or" or operator.lower() == "not":
+                operator = operator.upper()
+                if isinstance(operator_query, str):
+                    query = f"{query} {operator} {operator_query}"
+        # We have to use urllib.parse.quote and safe=":" to comply with Spotify's URL encoding (%20 instead of + and : to pass artist / track name)
+
+        query_params = urlencode(
+            {"q": query, "type": search_type.lower(), "limit": limit, "offset": offset},  safe=":")
+        return self.base_search(query_params)
+
+
 # This class for wrangling received outputs
 
 
@@ -223,23 +246,49 @@ class TrackFeatureProcessor(object):
         return df_to_clean.loc[:, df_to_clean.columns.intersection(
             cols_to_keep)]
 
+    def get_records(self,file_name, column_name):
+        # populate list of track ids
+        result = []
+        if path.exists(file_name):
+            with open(file_name, "r") as csv_file:
+                csv_reader = csv.DictReader(csv_file, delimiter=',')
+                for lines in csv_reader:
+                    result.append(lines[column_name])
+        return list(set(result))
+
+    def create_csv_file(self,filename, dataframe):
+        with open(filename, 'a') as f:
+            dataframe.to_csv(f, index=False)                        
+
+
+    def add_to_file(self,filename, dataframe):
+        ids = self.get_records(filename, "id")
+        df_ids = dataframe['id'].tolist()
+        if not set(df_ids).issubset(set(ids)):
+            with open(filename, 'a') as f:
+                dataframe.to_csv(f, header=False, index=False)
+
+    def add_to_csvs(self):
+        if not path.exists(ALL_ARTISTS):
+            self.create_csv_file(ALL_ARTISTS,self.artists_df)
+        else:
+            self.add_to_file(ALL_ARTISTS,self.artists_df)
+        if not path.exists(ALL_TRACKS):
+            self.create_csv_file(ALL_TRACKS,self.merged_df)
+        else:
+            self.add_to_file(ALL_TRACKS,self.merged_df)
+        if not path.exists(ALL_WORDS):
+            self.create_csv_file(ALL_WORDS,self.word_df)
+        else:
+            self.add_to_file(ALL_WORDS,self.word_df)
+
 # Here we go - some demonstration
 
 # lets search:
 
 
-def get_records(file_name, column_name):
-    # populate list of track ids
-    result = []
-    if path.exists(file_name):
-        with open(file_name, "r") as csv_file:
-            csv_reader = csv.DictReader(csv_file, delimiter=',')
-            for lines in csv_reader:
-                result.append(lines[column_name])
-    return list(set(result))
 
-
-def populate_processors(spotify, word, processors, collected_ids):
+def populate_processors(spotify, word, collected_ids):
     af_resps = {}
     tr_resps = {}
     if len(collected_ids) > 0:
@@ -252,36 +301,35 @@ def populate_processors(spotify, word, processors, collected_ids):
     # create an array of processors with dataframes
     if "tracks" in tr_resps.keys():
         for i in range(len(tr_resps["tracks"])):
-            processor = TrackFeatureProcessor(
-                tr_resps["tracks"][i], af_resps["audio_features"][i], word)
-            processor.process_feats_track()
-            processor.extract_artists_df()
-            processor.merge_track_features()
-            processor.create_word_df()
-            processors.append(processor)
-    return processors
+            if af_resps["audio_features"][i]:
+                processor = TrackFeatureProcessor(
+                    tr_resps["tracks"][i], af_resps["audio_features"][i], word)
+                processor.process_feats_track()
+                processor.extract_artists_df()
+                processor.merge_track_features()
+                processor.create_word_df()
+                processor.add_to_csvs()
+    return 0
 
 
-def spoti_search(word, spotify, collected_track_ids, prev_ids, offset=0, limit=20, global_limit=100, processors=[]):
+def spoti_search(word, spotify, collected_track_ids, prev_ids, offset=0, limit=20, global_limit=100, processors=[], artist=None):
     # most likely we will get several tracks per word,
-    spotify_response = spotify.search(
-        query=word, search_type="track", offset=offset, limit=limit)
+    spotify_response = spotify.search_artist_track(
+        q_track=word, q_artist=artist, search_type="track", offset=offset, limit=limit)
     if "tracks" in spotify_response.keys():
-        for track in spotify_response["tracks"]["items"]:
-            # check if track_id is in master ID list
-            if not track["id"] in prev_ids:
-                collected_track_ids.append(track["id"])
-    # add fresh ids to previous ids, !! Maybe shouldn't do it until have features
-    prev_ids = prev_ids + collected_track_ids
-    if (int(spotify_response["tracks"]["total"]) > int(spotify_response["tracks"]["offset"] + int(spotify_response["tracks"]["limit"]))) and (offset < global_limit):
+        new_track_ids = [d['id'] for d in spotify_response["tracks"]["items"]]
+        collected_track_ids = np.setdiff1d(new_track_ids,prev_ids)        
+        prev_ids.extend(collected_track_ids)
+        
+    # add fresh ids to previous ids, !! Maybe shouldn't do it until have features    
+    if (int(spotify_response["tracks"]["total"]) > int(int(spotify_response["tracks"]["offset"]) + int(spotify_response["tracks"]["limit"]))) and (offset < int(global_limit)):
         time.sleep(1)
         offset = offset + limit
-        processors = populate_processors(spotify, word,
-                                         processors, collected_track_ids)
+        populate_processors(spotify, word,collected_track_ids)        
         return spoti_search(word, spotify, collected_track_ids,
                             prev_ids, offset, limit, global_limit, processors=processors)
     else:
-        return processors
+        return 0
 
 
 def query_english():
@@ -298,46 +346,27 @@ def query_english():
     o = random.choice(l)
     return o
 
+def get_records(file_name, column_name):
+    # populate list of track ids
+    result = []
+    if path.exists(file_name):
+        with open(file_name, "r") as csv_file:
+            csv_reader = csv.DictReader(csv_file, delimiter=',')
+            for lines in csv_reader:
+                result.append(lines[column_name])
+    return list(set(result))
+
+             
+
 
 def runmemore(spotify=SpotifyAPI(client_id, client_secret), q_words=["denial", "aggression"], track_requests_limit=200):
-    processors = []
-
+    if not isinstance(q_words, list):
+        q_words = [q_words]
     # populate list of track ids
     previds = get_records(ALL_TRACKS, "id")
     # loop through random words to get tracks for each
     for word in q_words:
-        processors = spoti_search(
-            word, spotify, [], previds, global_limit=track_requests_limit)
-
-    # merge all dataframes into one and save as CSV
-    tracks_dfs = []
-    artists_dfs = []
-    word_df = []
-
-    if len(processors) > 0:
-        for processor in processors:
-            tracks_dfs.append(processor.merged_df)
-            artists_dfs.append(processor.artists_df)
-            word_df.append(processor.word_df)
-
-        tracks_df = pd.concat(tracks_dfs)
-        artists_df = pd.concat(artists_dfs)
-        words_df = pd.concat(word_df)
-
-        if not path.exists(ALL_ARTISTS):
-            artists_df.to_csv(ALL_ARTISTS, index=False)
-        else:
-            artists_df.to_csv(ALL_ARTISTS, mode='a', header=False, index=False)
-
-        if not path.exists(ALL_TRACKS):
-            tracks_df.to_csv(ALL_TRACKS, index=False)
-        else:
-            tracks_df.to_csv(ALL_TRACKS, mode='a', header=False, index=False)
-
-        if not path.exists(ALL_WORDS):
-            words_df.to_csv(ALL_WORDS, index=False)
-        else:
-            words_df.to_csv(ALL_WORDS, mode='a', header=False, index=False)
+        spoti_search(word, spotify, [], previds, global_limit=track_requests_limit)
 
 
 def random_word(num_runs):
@@ -353,31 +382,61 @@ def random_word(num_runs):
     return result
 
 
-words = ['we', 'hell', 'yes', 'she', 'like', 'breath', 'fire', 'don\'t', 'rock', 'disco', 'baby', 'twist', 'little', 'lonely']
-runmemore(q_words=words, track_requests_limit=50)
-# for i in range(0, 50):
-#     words = random_word(1)
-    # runmemore(q_words=words, track_requests_limit=50)  
-
-def run_num_tracks(spotify=SpotifyAPI(client_id, client_secret), num_tracks=20, q_words=["denial", "aggression"], track_requests_limit=200):
+def run_num_tracks(spotify=SpotifyAPI(client_id, client_secret), num_tracks=20, q_words=["denial", "aggression"], artist=None, track_requests_limit=200):
     processors = []
 
-    
+    # populate list of track ids
+    #previds = get_records(ALL_TRACKS, "id")
     # loop through random words to get tracks for each
+    if not isinstance(q_words, list):
+        q_words = [q_words]
     for word in q_words:
         processors = spoti_search(
-            word, spotify, [], [], global_limit=track_requests_limit, limit=num_tracks)
+            word,  spotify, [], [], limit=num_tracks, artist=artist, global_limit=track_requests_limit)
 
     # merge all dataframes into one and save as CSV
-    user_tracks_dfs = []
-    
+    tracks_dfs = []
+    artists_dfs = []
+    word_df = []
 
     if len(processors) > 0:
         for processor in processors:
-            user_tracks_dfs.append(processor.merged_df)
-        
+            tracks_dfs.append(processor.merged_df)
+            artists_dfs.append(processor.artists_df)
+            word_df.append(processor.word_df)
 
-    return user_tracks_dfs
-    
-# my_list=run_num_tracks(spotify=SpotifyAPI(client_id, client_secret), num_tracks=10, q_words=["toxic"], track_requests_limit=10)
-# print(my_list[0])
+    return tracks_dfs
+
+
+def randomize(number=20, req_limit=50):
+    for i in range(0, number):
+        words = random_word(1)
+        print(words)
+        runmemore(q_words=words, track_requests_limit=req_limit)
+
+
+def one_df_artist_track(artist, track):
+    mydfs = []
+    mydfs = run_num_tracks(q_words=track,
+                           artist=artist, track_requests_limit=1, num_tracks=1)
+    if len(mydfs) > 0:
+        return mydfs[0]
+    else:
+        return []
+
+
+def track_id_for_artist_title(artist, title):
+    track_id = None
+    spotif = SpotifyAPI(client_id, client_secret)
+    res = spotif.search_artist_track(
+        q_artist="benassi", q_track="satisfaction")
+    if (res['tracks']['items']) and (len(res["tracks"]["items"]) > 0):
+        track_id = res["tracks"]["items"][0]["id"]
+    return track_id
+
+
+
+# randomize()
+
+words = ['we', 'hell', 'yes', 'she', 'like', 'breath', 'fire', 'don\'t', 'rock', 'disco', 'baby', 'twist', 'little', 'lonely']
+runmemore(q_words=words, track_requests_limit=50)
