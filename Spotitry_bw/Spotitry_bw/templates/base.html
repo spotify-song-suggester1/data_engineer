@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Spotitry - {{ title }}</title>
+    <link rel="stylesheet" href="https://unpkg.com/picnic"/>
+  </head>
+  <body>
+    <nav>
+      <a href="/" class="brand"><span>Spotitry</span></a>
+      <!-- responsive-->
+      <input id="bmenub" type="checkbox" class="show">
+      <label for="bmenub" class="burger pseudo button">Menu</label>
+    </nav>
+    <article class="flex two" style="padding: 3em 1em;">
+      {% block content %}
+      <div>
+        <h1>{{ title }}</h1>
+        <form action="/compare" method="post">
+          <input type="text" name="song_name" placeholder="I Love This Song!">
+          <input type="text" name="artist_name" placeholder="I Love This Artist!">
+          <input type="submit" value="Show Me More!">
+        </form>
+      </div>
+      {% endblock %}
+    </article>
+  </body>
+</html>
