@@ -1,10 +1,10 @@
 """Retrieve songs and persist in database """
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from models import DB, spotitry_songs
-from keys import client_id, client_secret
+from .models import DB, spotitry_songs
+from .keys import client_id, client_secret
 from os import getenv
-from token_api import SpotifyAPI
+from .token_api import SpotifyAPI
 import sqlite3
 
 auth_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
@@ -63,11 +63,7 @@ def add_song(song_to_predict):
     conn = sqlite3.connect('spotitry_songs.db')
     curs = conn.cursor()
 
-    sql = "INSERT INTO spotitry_songs (id, name, energy, liveness, danceability, instrumentalness, loudness, speechiness, valence, tempo) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    val = (song_id, name, energy, liveness, danceability, instrumentalness, loudness, speechiness, valence, tempo)
-
-    curs.execute(sql, val)
-
+    curs.execute("""INSERT INTO spotitry_songs (id, name, energy, liveness, danceability, instrumentalness, loudness, speechiness, valence, tempo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", (song_id, name, energy, liveness, danceability, instrumentalness, loudness, speechiness, valence, tempo))
     conn.commit()
 
 
