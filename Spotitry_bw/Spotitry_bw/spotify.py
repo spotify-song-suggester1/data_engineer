@@ -1,10 +1,11 @@
 """Retrieve songs and persist in database """
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from .models import DB, spotitry_songs
-from .keys import client_id, client_secret
+from models import DB, spotitry_songs
+from keys import client_id, client_secret
 from os import getenv
-from .token_api import SpotifyAPI
+from token_api import SpotifyAPI
+import sqlite3
 
 auth_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
 sp = spotipy.Spotify(auth_manager=auth_manager)
@@ -48,31 +49,26 @@ def we_recommend(track_list):
 def add_song(song_to_predict):
     """Add song to DB, if song exists do nothing"""
 
-    try:
-        song_id = song_to_predict[0]
-        name = song_to_predict[1]
-        energy = song_to_predict[5]
-        liveness = song_to_predict[7]
-        danceability = song_to_predict[3]
-        instrumentalness = song_to_predict[6]
-        loudness = song_to_predict[8]
-        speechiness = song_to_predict[9]
-        valence = song_to_predict[11]
-        tempo = song_to_predict[10]
+    song_id = song_to_predict[0]
+    name = song_to_predict[1]
+    energy = song_to_predict[5]
+    liveness = song_to_predict[7]
+    danceability = song_to_predict[3]
+    instrumentalness = song_to_predict[6]
+    loudness = song_to_predict[8]
+    speechiness = song_to_predict[9]
+    valence = song_to_predict[11]
+    tempo = song_to_predict[10]
 
-        add_stip = (spotitry_songs.query.get(song_id) or
-                    spotitry_songs(id=song_id, name=name, energy=energy,
-                         liveness=liveness, danceability=danceability,
-                         instrumentalness=instrumentalness, loudness=loudness,
-                         speechiness=speechiness, valence=valence, tempo=tempo))
-        DB.session.add(add_stip)
-    
-    except Exception as e:
-        print('Error processing {}: {}'.format(song_to_predict, e))
-        raise e
-    else:
-        DB.session.commit()
+    conn = sqlite3.connect('spotitry_songs.db')
+    curs = conn.cursor()
 
+    sql = "INSERT INTO spotitry_songs (id, name, energy, liveness, danceability, instrumentalness, loudness, speechiness, valence, tempo) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    val = (song_id, name, energy, liveness, danceability, instrumentalness, loudness, speechiness, valence, tempo)
+
+    curs.execute(sql, val)
+
+    conn.commit()
 
 
 # This will give us the track id of the song input by user (Code by Ekaterina)
