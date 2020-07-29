@@ -1,7 +1,7 @@
 """Retrieve songs and persist in database """
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from .models import DB, Song
+from .models import DB, spotitry_songs
 from .keys import client_id, client_secret
 from os import getenv
 from .token_api import SpotifyAPI
@@ -60,8 +60,8 @@ def add_song(song_to_predict):
         valence = song_to_predict[11]
         tempo = song_to_predict[10]
 
-        add_stip = (Song.query.get(song_id) or
-                    Song(id=song_id, name=name, energy=energy,
+        add_stip = (spotitry_songs.query.get(song_id) or
+                    spotitry_songs(id=song_id, name=name, energy=energy,
                          liveness=liveness, danceability=danceability,
                          instrumentalness=instrumentalness, loudness=loudness,
                          speechiness=speechiness, valence=valence, tempo=tempo))

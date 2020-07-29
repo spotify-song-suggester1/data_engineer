@@ -1,6 +1,6 @@
 from os import getenv
 from flask import Flask, render_template, request
-from .models import DB, Song
+from .models import DB, spotitry_songs
 from .predict import predict_best_songs
 from .spotify import add_song
 

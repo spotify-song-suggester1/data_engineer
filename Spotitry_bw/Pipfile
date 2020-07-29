@@ -17,6 +17,7 @@ python-dotenv = "*"
 scikit-learn = "*"
 gunicorn = "*"
 psycopg2 = "*"
+pyodbc = "*"
 
 [requires]
 python_version = "3.7"
