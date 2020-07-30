@@ -1,0 +1,1 @@
+web: gunicorn spotitry:APP -t 120
