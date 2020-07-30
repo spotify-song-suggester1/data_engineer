@@ -129,5 +129,3 @@ dmypy.json
 .pyre/
 
 # Keys and Passwords
-
-keys.py
