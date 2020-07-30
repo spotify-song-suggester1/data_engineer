@@ -14,6 +14,11 @@ python spotiparser.py
 ~~3. Decide how to store this. ~~
    ~~1. Write a function that appends results to a master file.~~
 4. Decide what part of runmemore() should become a Class / method
+~~5. Balance dataset by adding more songs with high popularity
+~~6. Create a flask app with predictions and deply it to heroku
+   ~~1. Wre-wring previous code to use SQLAlchemy where possible
+   ~~2. Debugging routings and connections
+~~7. Creating plots for visualizations
 
 # Spotiparser Meldonium Edition (WADA non-compliant)
 
