@@ -1,4 +1,4 @@
-rom os import getenv
+from os import getenv
 from flask import Flask, render_template, request
 
 from sqlalchemy_utils import database_exists
