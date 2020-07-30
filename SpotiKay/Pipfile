@@ -1,0 +1,25 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+sqlalchemy-utils = "*"
+future = "*"
+
+[packages]
+random-word = "*"
+pandas = "*"
+requests = "*"
+flask = "*"
+jinja2 = "*"
+flask-sqlalchemy = "*"
+spotipy = "*"
+python-dotenv = "*"
+scikit-learn = "*"
+gunicorn = "*"
+psycopg2 = "*"
+sqlalchemy-utils = "*"
+
+[requires]
+python_version = "3.7"

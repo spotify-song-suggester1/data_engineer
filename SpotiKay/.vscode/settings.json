@@ -1,0 +1,7 @@
+{
+    "python.pythonPath": "/Users/stepanboltalin/opt/anaconda3/envs/jupyter/bin/python",
+    "python.linting.pylintArgs": [
+        "--load-plugins",
+        "pylint-flask"
+    ]
+}
