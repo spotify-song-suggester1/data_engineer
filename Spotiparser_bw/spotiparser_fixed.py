@@ -436,17 +436,7 @@ def track_id_for_artist_title(artist, title):
 
 
 
-randomize(number=1000, req_limit=100)
+# randomize(number=1000, req_limit=100)
+words = ['j', 'k', 'l', 'p', 'r']
 
-# words = ['we', 'hell', 'yes', 'she', 'like', 'breath', 'fire', 
-#          'don\'t', 'rock', 'disco', 'baby', 'twist', 'little', 
-#          'lonely', 'never', 'eyes', 'blue', 'great', 'heaven',
-#          'star', 'everybody', 'need', 'somebody', 'crazy', 'story',
-#          'crush', 'bleeding', 'blood', 'young', 'night', 'sorry', 
-#          'sun', 'heart', 'music', 'hot', 'jam', 'road', 'believe', 
-#          'morning', 'shine', 'nothing', 'home', 'bright', 'body',
-#          'move', 'ride', 'glory', 'hear', 'miss', 'kiss', 'wear', 
-#          'remember', 'forget', 'break', 'tease', 'tears', 'together',
-#          'forever', 'monster', 'leave', 'come']
-
-# runmemore(q_words=words, track_requests_limit=100)
+runmemore(q_words=words, track_requests_limit=500)
