@@ -5,6 +5,7 @@ import pandas as pd
 from pandas import DataFrame
 import sqlite3
 from sklearn.neighbors import NearestNeighbors
+import json
 
 
 def predict_best_songs(song_name, artist_name):
@@ -44,12 +45,19 @@ def predict_best_songs(song_name, artist_name):
 
     df = pd.DataFrame(SQL_Query, columns=['id','name','energy',
                                       'liveness','danceability','instrumentalness','loudness',
-                                      'speechiness','valence','tempo',])
+                                      'speechiness','valence','tempo'])
     
     track_list = predicto(track_id)
     
     #Here we'll turn our list of track ids into song names
     #Code by Ekaterina & Hernan
-    suggestions = we_recommend(track_list)
+    suggestions = get_features(track_list[0])
 
-    return suggestions
+    column_names = ['track_id', 'name', 'acousticness', 'danceability', 'duration_ms', 'energy', 'instrumentalness',
+                    'liveness', 'loudness', 'speechiness', 'tempo', 'valence']
+
+    final = pd.DataFrame([suggestions], columns=column_names)
+
+    result = final.to_json()
+
+    return result

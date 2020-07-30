@@ -30,11 +30,8 @@ def root():
 
 @app.route('/compare', methods=['POST'])
 def compare(message=''):
-    song, artist = [request.values['song_name'],
-                            request.values['artist_name']]
+    song, artist = ([request.values['song_name'],
+                            request.values['artist_name']])
     suggestions = predict_best_songs(song, artist)
 
-    message = 'If you love {} by {}, we recommend: {}'.format(song, artist, ' or '.join(map(str, suggestions)))
-            
-    return render_template('recommendation.html', title='Recommendation',
-                            message=message)
+    return suggestions
