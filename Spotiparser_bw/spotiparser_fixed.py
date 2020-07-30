@@ -323,7 +323,7 @@ def spoti_search(word, spotify, collected_track_ids, prev_ids, offset=0, limit=2
         
     # add fresh ids to previous ids, !! Maybe shouldn't do it until have features    
     if (int(spotify_response["tracks"]["total"]) > int(int(spotify_response["tracks"]["offset"]) + int(spotify_response["tracks"]["limit"]))) and (offset < int(global_limit)):
-        time.sleep(1)
+        time.sleep(0.5)
         offset = offset + limit
         populate_processors(spotify, word,collected_track_ids)        
         return spoti_search(word, spotify, collected_track_ids,
@@ -436,7 +436,17 @@ def track_id_for_artist_title(artist, title):
 
 
 
-# randomize()
+randomize(number=1000, req_limit=100)
 
-words = ['we', 'hell', 'yes', 'she', 'like', 'breath', 'fire', 'don\'t', 'rock', 'disco', 'baby', 'twist', 'little', 'lonely']
-runmemore(q_words=words, track_requests_limit=50)
+# words = ['we', 'hell', 'yes', 'she', 'like', 'breath', 'fire', 
+#          'don\'t', 'rock', 'disco', 'baby', 'twist', 'little', 
+#          'lonely', 'never', 'eyes', 'blue', 'great', 'heaven',
+#          'star', 'everybody', 'need', 'somebody', 'crazy', 'story',
+#          'crush', 'bleeding', 'blood', 'young', 'night', 'sorry', 
+#          'sun', 'heart', 'music', 'hot', 'jam', 'road', 'believe', 
+#          'morning', 'shine', 'nothing', 'home', 'bright', 'body',
+#          'move', 'ride', 'glory', 'hear', 'miss', 'kiss', 'wear', 
+#          'remember', 'forget', 'break', 'tease', 'tears', 'together',
+#          'forever', 'monster', 'leave', 'come']
+
+# runmemore(q_words=words, track_requests_limit=100)
