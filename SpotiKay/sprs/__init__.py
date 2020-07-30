@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 # from sqlalchemy.ext.declarative import declarative_base
 # from sqlalchemy.orm import sessionmaker
 
-app = Flask(name)
+app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_NOTIFICATIONS'] = False
 DB = SQLAlchemy(app)
@@ -30,8 +30,8 @@ def root():
 
 @app.route('/compare', methods=['POST'])
 def compare(message=''):
-    song, artist = sorted([request.values['song_name'],
-                            request.values['artist_name']])
+    song, artist = [request.values['song_name'],
+                            request.values['artist_name']]
     suggestions = predict_best_songs(song, artist)
 
     message = 'If you love {} by {}, we recommend: {}'.format(song, artist, ' or '.join(map(str, suggestions)))
